@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:sys_monitor/get_hw_data_service.dart';
 import 'package:sys_monitor/navigation_drawer.dart';
 import 'package:activity_ring/activity_ring.dart';
+import 'package:wakelock/wakelock.dart';
 
 class SysMonitor extends StatefulWidget {
   static const String routeName = '/';
@@ -38,6 +39,7 @@ class _SysMonitorState extends State<SysMonitor> {
   void setupHwData() async {
     HwData instance = HwData();
     await instance.getData();
+    if (!mounted) return;
     DateTime now = DateTime.now();
     String formattedTitle1 =
         'System Monitor - Swapnesh - ' + DateFormat('kk:mm:ss').format(now);
@@ -65,7 +67,8 @@ class _SysMonitorState extends State<SysMonitor> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setEnabledSystemUIOverlays([]);
+    Wakelock.enable();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
     _timer = Timer.periodic(new Duration(seconds: 1), (timer) {
       setupHwData();
     });
@@ -74,6 +77,7 @@ class _SysMonitorState extends State<SysMonitor> {
   @override
   void dispose() {
     _timer.cancel();
+    Wakelock.disable();
     super.dispose();
   }
 
